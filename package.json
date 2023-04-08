@@ -1,0 +1,103 @@
+{
+  "name": "belledu",
+  "displayName": "belledu",
+  "description": "",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.77.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "belledu.login",
+        "title": "Login to Belledu"
+      },
+      {
+        "command": "belledu.providePage",
+        "title": "上一页",
+        "icon": {
+          "light": "./resources/up.svg",
+          "dark": "./resources/up_dark.svg"
+        }
+      },
+      {
+        "command": "belledu.nextPage",
+        "title": "下一页",
+        "icon": {
+          "light": "./resources/under.svg",
+          "dark": "./resources/under_dark.svg"
+        }
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "belledu.providePage",
+          "when": "view == sidebar_testing",
+          "group": "navigation"
+        },
+        {
+          "command": "belledu.nextPage",
+          "when": "view == sidebar_testing",
+          "group": "navigation"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Belledu",
+      "properties": {}
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "belledu_bar",
+          "title": "Belledu",
+          "icon": "./resources/icon.png"
+        }
+      ]
+    },
+    "views": {
+      "belledu_bar": [
+        {
+          "id": "sidebar_account_count",
+          "name": "账号统计",
+          "visibility": "collapsed"
+        },
+        {
+          "id": "sidebar_testing",
+          "name": "题库",
+          "visibility": "visible"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "pretest": "npm run lint",
+    "test": "node ./test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "16.x",
+    "@types/vscode": "^1.77.0",
+    "@vscode/test-electron": "^2.3.0",
+    "eslint": "^8.36.0",
+    "glob": "^8.1.0",
+    "mocha": "^10.2.0",
+    "typescript": "^4.9.5"
+  },
+  "dependencies": {
+    "node-fetch": "^2.6.9",
+    "swig": "^1.4.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cheese233/belledu.git"
+  }
+}

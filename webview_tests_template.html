@@ -1,0 +1,146 @@
+<div class="programme-card-title">
+    <div class="programme-intro">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3>题目描述</h3>
+        </div>
+        <div>{{ description }}
+        </div>
+    </div>
+    {% if inputDescription %}
+    <div class="programme-intro">
+        <h3>输入格式</h3>
+        <div>{{ inputDescription }}</div>
+    </div>
+    {% endif %}
+    {% if outputDescription %}
+    <div class="programme-intro">
+        <h3>输出格式</h3>
+        <div>{{ outputDescription }}</div>
+    </div>
+    {% endif %}
+    {% if samples %}
+    <div>
+        {% for sample in samples %}
+        {% if sample.input %}
+        <div class="programme-intro">
+            <h3> 样例输入{{ loop.index }}</h3>
+            <div class="programme-example">
+                <pre>{{ sample.input }}</pre>
+            </div>
+        </div>
+        {% endif %}
+        {% if sample.output %}
+        <div class="programme-intro">
+            <h3> 样例输出{{ loop.index }}</h3>
+            <div class="programme-example">
+                <pre>{{ sample.output }}</pre>
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% if hint %}
+    <div class="programme-intro">
+        <h3>提示<span class="close-hint">显示</span></h3>
+        <div id="hint" style="visibility:hidden;">{{ hint }}</div>
+    </div>
+    {% endif %}
+    <div class="buttons">
+        <button id="save">保存</button><button id="test">测试</button><button id="submit">提交</button>
+    </div>
+</div>
+<script>
+    var vscode = acquireVsCodeApi();
+    document.getElementById("save").onclick = () => {
+        vscode.postMessage({
+            action: "save"
+        })
+    }
+    document.getElementsByClassName("close-hint")[0].onclick = () => {
+        var elem = document.getElementById('hint');
+        if (elem.style.visibility == "hidden") {
+            document.getElementsByClassName("close-hint")[0].innerText = "关闭";
+            elem.style.visibility = "visible";
+        }
+        else {
+            document.getElementsByClassName("close-hint")[0].innerText = "显示";
+            elem.style.visibility = "hidden";
+        }
+    }
+</script>
+<style>
+    .programme-intro h3 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin: 10px 0;
+    }
+
+    .programme-example {
+        background: #f8f8f888;
+        border: 1px solid #dedede;
+        padding: 5px 10px;
+        border-radius: 5px;
+    }
+
+    .programme-example pre {
+        word-break: break-all;
+        word-wrap: break-word;
+        white-space: pre-wrap;
+        line-height: 28px;
+        color: #d33131;
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .programme-card-title {
+        margin: 1rem;
+    }
+
+    .buttons {
+        margin: 1rem;
+        position: absolute;
+        right: 0;
+    }
+
+    .buttons button {
+        background-color: #004daa !important;
+        color: #e8e6e3 !important;
+        border: 0;
+        transition: .1s;
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        font-size: 14px;
+        margin: 1px;
+    }
+
+    .buttons button:first-child {
+        border-top-left-radius: 1rem;
+        border-bottom-left-radius: 1rem;
+    }
+
+    .buttons button:last-child {
+        border-top-right-radius: 1rem;
+        border-bottom-right-radius: 1rem;
+    }
+
+    .buttons button:hover {
+        filter: brightness(0.9);
+        cursor: pointer;
+    }
+
+    .close-hint {
+        float: right;
+        line-height: 1;
+        white-space: nowrap;
+        cursor: pointer;
+        background-color: #004daa !important;
+        color: #e8e6e3 !important;
+        text-align: center;
+        font-weight: 500;
+        font-size: 14px;
+        padding: 5px;
+        border-radius: 5px;
+    }
+</style>

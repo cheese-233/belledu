@@ -64,11 +64,6 @@
     "views": {
       "belledu_bar": [
         {
-          "id": "sidebar_account_count",
-          "name": "账号统计",
-          "visibility": "collapsed"
-        },
-        {
           "id": "sidebar_testing",
           "name": "题库",
           "visibility": "visible"

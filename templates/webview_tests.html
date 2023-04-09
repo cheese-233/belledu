@@ -25,7 +25,7 @@
         <div class="programme-intro">
             <h3> 样例输入{{ loop.index }}</h3>
             <div class="programme-example">
-                <pre>{{ sample.input }}</pre>
+                <code><pre>{{ sample.input }}</pre></code>
             </div>
         </div>
         {% endif %}
@@ -33,7 +33,7 @@
         <div class="programme-intro">
             <h3> 样例输出{{ loop.index }}</h3>
             <div class="programme-example">
-                <pre>{{ sample.output }}</pre>
+                <code><pre>{{ sample.output }}</pre></code>
             </div>
         </div>
         {% endif %}
@@ -45,29 +45,39 @@
         <h3>提示<span class="close-hint">显示</span></h3>
         <div id="hint" style="visibility:hidden;">{{ hint }}</div>
     </div>
+    <script>
+        document.getElementsByClassName("close-hint")[0].onclick = () => {
+            var elem = document.getElementById('hint');
+            if (elem.style.visibility == "hidden") {
+                document.getElementsByClassName("close-hint")[0].innerText = "关闭";
+                elem.style.visibility = "visible";
+            }
+            else {
+                document.getElementsByClassName("close-hint")[0].innerText = "显示";
+                elem.style.visibility = "hidden";
+            }
+        }
+    </script>
     {% endif %}
     <div class="buttons">
-        <button id="save">保存</button><button id="test">测试</button><button id="submit">提交</button>
+        <button id="save">保存</button><button id="test">测试</button><button id="reopen">打开</button><button
+            id="submit">提交</button>
     </div>
 </div>
 <script>
     var vscode = acquireVsCodeApi();
-    document.getElementById("save").onclick = () => {
-        vscode.postMessage({
-            action: "save"
-        })
-    }
-    document.getElementsByClassName("close-hint")[0].onclick = () => {
-        var elem = document.getElementById('hint');
-        if (elem.style.visibility == "hidden") {
-            document.getElementsByClassName("close-hint")[0].innerText = "关闭";
-            elem.style.visibility = "visible";
-        }
-        else {
-            document.getElementsByClassName("close-hint")[0].innerText = "显示";
-            elem.style.visibility = "hidden";
-        }
-    }
+    document.getElementById("save").onclick = () => vscode.postMessage({
+        action: "save"
+    })
+    document.getElementById("test").onclick = () => vscode.postMessage({
+        action: "test"
+    })
+    document.getElementById("reopen").onclick = () => vscode.postMessage({
+        action: "reopen"
+    })
+    document.getElementById("submit").onclick = () => vscode.postMessage({
+        action: "submit"
+    })
 </script>
 <style>
     .programme-intro h3 {
@@ -95,13 +105,15 @@
     }
 
     .programme-card-title {
-        margin: 1rem;
+        padding: 1rem;
     }
 
     .buttons {
         margin: 1rem;
-        position: absolute;
-        right: 0;
+        margin-right: 0;
+        margin-left: 0;
+        float: right;
+        white-space: nowrap;
     }
 
     .buttons button {

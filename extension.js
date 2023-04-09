@@ -2,9 +2,11 @@
 // Import the module and reference it with the alias vscode in your code below
 const vscode = require('vscode');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
-const Auth = require('./auth');
+const Auth = require('./api/auth');
+const TestApi = require('./api/tests');
 const swig = require('swig');
 const path = require('path');
+const { open } = require('fs');
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 class TestsEntryItem extends vscode.TreeItem {
@@ -13,16 +15,7 @@ class TestsEntryItem extends vscode.TreeItem {
 let ProblemListPages = 1;
 let RequestProblemsMax = 0;
 const requestProblemList = async () => {
-	let a = await fetch("https://noip.belledu.com/api/problem/pageProblemsList?page=" + String(ProblemListPages) + "&limit=50&title=&difficulty=&categoryId=&result=&tagId=", {
-		"credentials": "include",
-		"headers": {
-			...Auth.AuthHander,
-			"Authorization": Auth.getKey()
-		},
-		"referrer": "https://noip.belledu.com/",
-		"method": "GET",
-		"mode": "cors"
-	});
+	let a = await TestApi.problemList(ProblemListPages);
 	let jsonA = await a.json();
 	RequestProblemsMax = Number(jsonA.data.count);
 	return jsonA;
@@ -53,7 +46,7 @@ class TreeNodeProvider {
 			item.command = {
 				command: "belledu_sidebar_tests.openChild",
 				title: "",
-				arguments: [child.id]
+				arguments: [child.id, child.code]
 			};
 			childs[index] = item;
 			index++;
@@ -72,18 +65,6 @@ function RenderTestWebwiew(path, detail) {
 /**
  * @param {vscode.ExtensionContext} context
  */
-const saveSlove = async (content, id) => await fetch("https://noip.belledu.com/api/problem/problemSave", {
-	"credentials": "include",
-	"headers": {
-		"Content-Type": "application/json;charset=UTF-8",
-		"Authorization": Auth.getKey(),
-		...Auth.AuthHander
-	},
-	"referrer": "https://noip.belledu.com/",
-	"body": JSON.stringify({ content: String(content), language: "C++", problemId: String(id) }),
-	"method": "POST",
-	"mode": "cors"
-});
 async function activate(context) {
 	let showLoginBox = async () => {
 		let account = await vscode.window.showInputBox({
@@ -132,7 +113,7 @@ async function activate(context) {
 	if (Auth.getKey() != undefined) {
 		let checkLogin = await (await Auth.checkLoginPassword()).json();
 		if (checkLogin.status != 200) {
-			vscode.window.showInformationMessage(checkLogin.message);
+			vscode.window.showWarningMessage(checkLogin.message);
 		}
 	}
 	const treeNodeProvider = new TreeNodeProvider();
@@ -151,7 +132,7 @@ async function activate(context) {
 			treeNodeProvider.refresh();
 		}
 	});
-	vscode.commands.registerCommand("belledu_sidebar_tests.openChild", async args => {
+	vscode.commands.registerCommand("belledu_sidebar_tests.openChild", async (args, testCode) => {
 		let panel = vscode.window.createWebviewPanel(
 			"belledu.viewTestDetailPanel",
 			"",
@@ -161,17 +142,9 @@ async function activate(context) {
 			}
 		);
 		let showTestsDetail = async function () {
-			let testDetail = (await (await fetch("https://noip.belledu.com/api/problem/problemDetail?problemId=" + args, {
-				"credentials": "include",
-				"headers": {
-					...Auth.AuthHander, "Authorization": Auth.getKey()
-				},
-				"referrer": "https://noip.belledu.com/",
-				"method": "GET",
-				"mode": "cors"
-			})).json()).data;
+			let testDetail = (await (await TestApi.getTestDetails(args)).json()).data;
 			panel.title = testDetail.title;
-			panel.webview.html = RenderTestWebwiew(path.join(context.extensionPath, "webview_tests_template.html"), {
+			panel.webview.html = RenderTestWebwiew(path.join(context.extensionPath, "templates/webview_tests.html"), {
 				description: testDetail.description,
 				inputDescription: testDetail.inputDescription,
 				outputDescription: testDetail.outputDescription,
@@ -180,13 +153,87 @@ async function activate(context) {
 			});
 			return testDetail;
 		};
+		let showTestSloveDetail = function (res) {
+			let testPanel = vscode.window.createWebviewPanel(
+				"belledu.viewTestSlovePanel",
+				"测试结果",
+				vscode.ViewColumn.Active,
+				{
+					enableScripts: true,
+					retainContextWhenHidden: true
+
+				}
+			);
+			testPanel.webview.html = RenderTestWebwiew(path.join(context.extensionPath, "templates/webview_tests_testOutput.html"), {
+				time: res.data.time,
+				memory: Number(res.data.memory) / 1000,
+				content: res.data.output
+			});
+			return testPanel;
+		}
+		let showSubmitSloveDetail = function (uuid) {
+			let submitPanel = vscode.window.createWebviewPanel(
+				"belledu.viewSubmitSlovePanel",
+				"判题结果",
+				vscode.ViewColumn.Active,
+				{
+					enableScripts: true,
+					retainContextWhenHidden: true
+
+				}
+			);
+			submitPanel.webview.html = RenderTestWebwiew(path.join(context.extensionPath, "templates/webview_tests_submit.html"), {
+				success: false
+			});
+			const setEndHTML = setInterval(async () => {
+				let submitQuery = await (await TestApi.querySloveResult(uuid)).json();
+				if (submitQuery.data.isResult) {
+					let resultUrl = await TestApi.getSloveResultUrl(testCode);
+					submitPanel.webview.html = RenderTestWebwiew(path.join(context.extensionPath, "templates/webview_tests_submit.html"), {
+						success: true, problemId: resultUrl.data.data[0].id
+					});
+					clearInterval(setEndHTML);
+				}
+			}, 500);
+		}
 		let detail = await showTestsDetail();
-		const doc = await vscode.workspace.openTextDocument({ language: "cpp", content: ((detail.lastSubmission) ? detail.lastSubmission.code : "") });
-		await vscode.window.showTextDocument(doc, { preview: false, viewColumn: vscode.ViewColumn.Two });
+		const docSetting = { language: "cpp", content: ((detail.lastSubmission) ? detail.lastSubmission.code : "") };
+		let doc = await vscode.workspace.openTextDocument(docSetting);
+		const openDoc = async () => await vscode.window.showTextDocument(doc, { preview: false, viewColumn: vscode.ViewColumn.Two });
+		await openDoc();
 		panel.webview.onDidReceiveMessage(async function (data) {
-			if (data.action === "save") {
-				let res = await (await saveSlove(doc.getText(), Number(args))).json();
-				vscode.window.showInformationMessage(res.message);
+			const isOpen = () => {
+				if (doc.isClosed) {
+					vscode.window.showWarningMessage("请先打开编辑页面！");
+				}
+				return !doc.isClosed;
+			}
+			switch (data.action) {
+				case "reopen":
+					if (doc.isClosed) {
+						doc = await vscode.workspace.openTextDocument(docSetting);
+						await openDoc();
+					}
+					break;
+				case "save":
+					if (isOpen()) {
+						let res = await (await TestApi.saveSlove(doc.getText(), Number(args))).json();
+						vscode.window.showInformationMessage(res.message);
+					}
+					break;
+				case "test":
+					if (isOpen()) {
+						let res = await (await TestApi.testSlove(doc.getText(), "1 1", Number(args))).json();
+						showTestSloveDetail(res);
+					}
+					break;
+				case "submit":
+					if (isOpen()) {
+						let submit = await (await TestApi.submitSlove(doc.getText(), Number(args))).json();
+						let submitUUID = submit.data.uuid;
+						showSubmitSloveDetail(submitUUID);
+					}
+					break;
 			}
 		});
 	});

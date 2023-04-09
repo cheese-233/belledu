@@ -1,0 +1,43 @@
+<div class="console-count">
+    <span>时间：</span>{{ time }} ms
+    <span>内存：</span>{{ memory }} MB
+</div>
+<div class="console-block">
+    <pre class="console-style">{{ content }}</pre>
+</div>
+
+<style>
+    .console-block {
+        padding: 1rem;
+        background-color: black !important;
+        color: white;
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        overflow: auto;
+    }
+
+    .console-style {
+        font-weight: 500;
+        font-size: 14px;
+        line-height: 28px;
+        word-break: break-all;
+        font-family: var(--vscode-editor-font-family);
+    }
+
+    .console-count {
+        color: #ffffff99;
+        padding: 1rem;
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        z-index: 999;
+        font-size: small;
+    }
+
+    body {
+        overflow: hidden;
+    }
+</style>

@@ -1,16 +1,17 @@
 {
   "name": "belledu",
   "displayName": "belledu",
-  "description": "",
+  "description": "this is a vscode extension for noip.belledu.com.",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.77.0"
   },
+  "publisher": "cheese233",
   "categories": [
     "Other"
   ],
   "author": {
-    "name": "cheese-233"
+    "name": "cheese233"
   },
   "icon": "resources/icon.png",
   "activationEvents": [],

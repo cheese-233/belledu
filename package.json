@@ -9,40 +9,54 @@
   "categories": [
     "Other"
   ],
+  "author": {
+    "name": "cheese-233"
+  },
+  "icon": "resources/icon.png",
   "activationEvents": [],
   "main": "./extension.js",
   "contributes": {
     "commands": [
       {
         "command": "belledu.login",
-        "title": "Login to Belledu"
+        "title": "登录",
+        "icon": "$(account)"
       },
       {
         "command": "belledu.providePage",
         "title": "上一页",
-        "icon": {
-          "light": "./resources/up.svg",
-          "dark": "./resources/up_dark.svg"
-        }
+        "icon": "$(chevron-up)"
       },
       {
         "command": "belledu.nextPage",
         "title": "下一页",
-        "icon": {
-          "light": "./resources/under.svg",
-          "dark": "./resources/under_dark.svg"
-        }
+        "icon": "$(chevron-down)"
       }
     ],
     "menus": {
-      "view/title": [
+      "commandPalette": [
         {
           "command": "belledu.providePage",
+          "when": "never"
+        },
+        {
+          "command": "belledu.nextPage",
+          "when": "never"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "belledu.nextPage",
           "when": "view == sidebar_testing",
           "group": "navigation"
         },
         {
-          "command": "belledu.nextPage",
+          "command": "belledu.login",
+          "when": "view == sidebar_testing",
+          "group": "navigation"
+        },
+        {
+          "command": "belledu.providePage",
           "when": "view == sidebar_testing",
           "group": "navigation"
         }
@@ -93,6 +107,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cheese233/belledu.git"
+    "url": "https://github.com/cheese-233/belledu.git"
   }
 }

@@ -1,4 +1,4 @@
-const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
+const fetch = require('node-fetch');
 const Auth = require('./auth');
 let exportApi = {};
 exportApi.problemList = async (ProblemListPages) => await fetch("https://noip.belledu.com/api/problem/pageProblemsList?page=" + String(ProblemListPages) + "&limit=50&title=&difficulty=&categoryId=&result=&tagId=", {

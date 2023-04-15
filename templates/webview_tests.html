@@ -1,3 +1,6 @@
+<head>
+    <meta http-equiv="Content-Security-Policy">
+</head>
 <div class="programme-card-title">
     <div class="programme-intro">
         <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -74,6 +77,9 @@
     })
     document.getElementById("reopen").onclick = () => vscode.postMessage({
         action: "reopen"
+    })
+    document.getElementById("reopen").onmouseover = () => vscode.postMessage({
+        action: "reopenHover"
     })
     document.getElementById("submit").onclick = () => vscode.postMessage({
         action: "submit"

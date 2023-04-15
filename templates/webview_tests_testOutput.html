@@ -1,12 +1,69 @@
-<div class="console-count">
-    <span>时间：</span>{{ time }} ms
-    <span>内存：</span>{{ memory }} MB
+<head>
+    <meta http-equiv="Content-Security-Policy">
+</head>
+{% if chooseInput %}
+<div class="warp-test">
+    <dialog class="test-give" open>
+        <h3>在这输入你的测试数据</h3>
+        <textarea id="inputTexts" name="0"></textarea>
+        <div class="buttons"><button class="choose" style="--show-color:red;">选择</button>
+            <button class="testSubmit">提交</button>
+        </div>
+    </dialog>
 </div>
+<div class="console-block"></div>
+{% else %}
 <div class="console-block">
+    {% if time %}
+    <div class="console-count">
+        <span>时间：</span>{{ time }} ms
+        <span>内存：</span>{{ memory }} MB
+    </div>
+    {% endif %}
     <pre class="console-style">{{ content }}</pre>
 </div>
-
+{% endif %}
+<div id="chooses">
+    <div class="example"></div>
+    {% for sample in samples %}
+    {% if sample.input %}
+    <div class="example">{{ sample.input }}</div>
+    {% endif %}
+    {% endfor %}
+</div>
+{% if chooseInput %}
+<script>
+    let choose = document.getElementById("chooses");
+    let chooses = [];
+    for (var i of choose.children) {
+        chooses.push(i.innerText);
+    }
+    let rgbDefine = ["red", "orange", "yellow", "green", "cyan", "blue", "purple"];
+    document.querySelector(".choose").onclick = () => {
+        let input = document.getElementById("inputTexts");
+        input.name = String(Number(input.name) + 1);
+        if (Number(input.name) >= chooses.length) {
+            input.name = String(0);
+        }
+        input.innerHTML = chooses[Number(input.name)];
+        let rgb = document.querySelector(".choose").style.cssText.split("--show-color:")[1].split(";")[0];
+        let rgbIndex = rgbDefine.indexOf(rgb) + 1;
+        if (rgbIndex >= rgbDefine.length || rgbIndex >= chooses.length) {
+            rgbIndex = 0;
+        }
+        document.querySelector(".choose").style = "--show-color:" + rgbDefine[rgbIndex] + ";";
+    };
+    var vscode = acquireVsCodeApi();
+    document.querySelector(".testSubmit").onclick = () => vscode.postMessage({
+        testData: document.getElementById("inputTexts").innerHTML
+    });
+</script>
+{% endif %}
 <style>
+    #chooses {
+        display: none;
+    }
+
     .console-block {
         padding: 1rem;
         background-color: black !important;
@@ -17,6 +74,10 @@
         bottom: 0;
         right: 0;
         overflow: auto;
+    }
+
+    .console-block::-webkit-scrollbar-thumb {
+        background-color: #999999;
     }
 
     .console-style {
@@ -35,6 +96,84 @@
         right: 0;
         z-index: 999;
         font-size: small;
+    }
+
+    .test-give {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        overflow: auto;
+        background-color: white;
+        width: 400px;
+        height: 200px;
+        overflow: auto;
+        color: black;
+        padding: 1rem;
+        border-radius: 0.5rem;
+    }
+
+    .warp-test {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        overflow: auto;
+        margin: 0;
+        z-index: 1000;
+    }
+
+    .test-give h3 {
+        line-height: 24px;
+        font-size: 18px;
+        font-weight: normal;
+        margin-top: 0;
+    }
+
+    .test-give textarea {
+        min-height: 100px;
+        width: calc(100% - 8px);
+        left: 0;
+        font-size: 16px;
+        resize: none;
+    }
+
+    .test-give .buttons {
+        float: right;
+        margin: 1rem;
+    }
+
+    .test-give .buttons button {
+        display: inline-block;
+        line-height: 1;
+        white-space: nowrap;
+        cursor: pointer;
+        background: #fff;
+        background-color: rgb(255, 255, 255);
+        border: 1px solid #dcdfe6;
+        color: rgb(102, 107, 102);
+        text-align: center;
+        box-sizing: border-box;
+        outline: 0;
+        margin: 0;
+        transition: .1s;
+        font-weight: 500;
+        padding: 0.5rem;
+        font-size: 14px;
+        border-radius: 4px;
+        transition: .2s;
+    }
+
+    .test-give .buttons button.choose:hover {
+        background-color: var(--show-color);
+        filter: opacity(0.6);
+        color: #000000;
+    }
+
+    .test-give .buttons button.testSubmit:hover {
+        background-color: rgb(102, 177, 255);
     }
 
     body {

@@ -2,9 +2,9 @@
   "name": "belledu",
   "displayName": "belledu",
   "description": "this is a vscode extension for noip.belledu.com.",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "engines": {
-    "vscode": "^1.77.0"
+    "vscode": "^1.75.0"
   },
   "publisher": "cheese233",
   "categories": [
@@ -95,7 +95,7 @@
     "@types/glob": "^8.1.0",
     "@types/mocha": "^10.0.1",
     "@types/node": "16.x",
-    "@types/vscode": "^1.77.0",
+    "@types/vscode": "^1.75.0",
     "@vscode/test-electron": "^2.3.0",
     "eslint": "^8.36.0",
     "glob": "^8.1.0",
